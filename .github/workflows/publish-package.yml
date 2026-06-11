@@ -19,15 +19,115 @@ permissions:
 env:
   PipelineEnvironment: true
   NUGET_XMLDOC_MODE: skip
+  DOTNET_VERSION: 10.0.x
+  CONFIGURATION: Release
+  PROJECT: src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj
+  PACKAGE_ID: Soenneker.Azure.NotificationHubs.Maui
 
 jobs:
-  publish-package:
-    runs-on: windows-latest
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Android
+            os: ubuntu-latest
+            framework: net10.0-android
+            output_framework: net10.0-android
+            package_framework: net10.0-android36.0
+            workload: maui-android
+            artifact: android
+
+          - name: iOS
+            os: macos-latest
+            framework: net10.0-ios
+            output_framework: net10.0-ios
+            package_framework: net10.0-ios26.0
+            workload: maui-ios
+            artifact: ios
+
+          - name: Windows
+            os: windows-latest
+            framework: net10.0-windows10.0.19041.0
+            output_framework: net10.0-windows10.0.19041.0
+            package_framework: net10.0-windows10.0.19041
+            workload: maui-windows
+            artifact: windows
 
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          workloads: ${{ matrix.workload }}
+
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT }} -f ${{ matrix.framework }} --verbosity minimal
+
+      - name: Build
+        run: dotnet build ${{ env.PROJECT }} --configuration ${{ env.CONFIGURATION }} -f ${{ matrix.framework }} --no-restore --verbosity minimal
+
+      - name: Stage build output
+        shell: pwsh
+        run: |
+          $source = Join-Path $env:GITHUB_WORKSPACE "src/Soenneker.Azure.NotificationHubs.Maui/bin/${{ env.CONFIGURATION }}/${{ matrix.output_framework }}"
+          $target = Join-Path $env:GITHUB_WORKSPACE "artifacts/${{ matrix.package_framework }}"
+          New-Item -ItemType Directory -Force -Path $target | Out-Null
+
+          $packageId = "${{ env.PACKAGE_ID }}"
+
+          foreach ($extension in @(".dll", ".xml", ".pdb", ".aar", ".pri")) {
+            $file = Join-Path $source "$packageId$extension"
+            if (Test-Path $file) {
+              Copy-Item -Path $file -Destination $target -Force
+            }
+          }
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: artifacts/${{ matrix.package_framework }}
+
+  pack:
+    name: Pack and publish
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Download Android
+        uses: actions/download-artifact@v4
+        with:
+          name: android
+          path: package/lib/net10.0-android36.0
+
+      - name: Download iOS
+        uses: actions/download-artifact@v4
+        with:
+          name: ios
+          path: package/lib/net10.0-ios26.0
+
+      - name: Download Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: windows
+          path: package/lib/net10.0-windows10.0.19041
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Setting up build version
         shell: bash
@@ -44,39 +144,68 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_ENV"
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Workload restore
-        run: dotnet workload restore src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --verbosity minimal
-
-      - name: Restore tests
-        run: dotnet restore test/Soenneker.Azure.NotificationHubs.Maui.Tests/Soenneker.Azure.NotificationHubs.Maui.Tests.csproj --verbosity minimal
-
-      - name: Build tests
-        run: dotnet build test/Soenneker.Azure.NotificationHubs.Maui.Tests/Soenneker.Azure.NotificationHubs.Maui.Tests.csproj --configuration Release --no-restore --verbosity minimal
-
-      - name: Test
-        run: dotnet test --project test/Soenneker.Azure.NotificationHubs.Maui.Tests/Soenneker.Azure.NotificationHubs.Maui.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal
-
-
-      - name: Restore library
-        run: dotnet restore src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --verbosity minimal
-
-      - name: Build library
-        run: dotnet build src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --configuration Release --no-restore --verbosity minimal
-
-      - name: Pack
+      - name: Create nuspec
         shell: bash
         run: |
-          mkdir -p artifacts
-          dotnet pack src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj \
-            --configuration Release \
-            --no-build \
-            --no-restore \
-            --output ./artifacts
+          cat > "${PACKAGE_ID}.nuspec" <<EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+            <metadata>
+              <id>${PACKAGE_ID}</id>
+              <version>${BUILD_VERSION}</version>
+              <authors>Jake Soenneker</authors>
+              <license type="expression">MIT</license>
+              <icon>icon.png</icon>
+              <readme>README.md</readme>
+              <projectUrl>https://github.com/soenneker/soenneker.azure.notificationhubs.maui</projectUrl>
+              <description>A .NET MAUI library for Azure Notification Hubs push installation lifecycle, push channel management, permission handling, and notification tap routing.</description>
+              <releaseNotes><![CDATA[${PACKAGE_RELEASE_NOTES}]]></releaseNotes>
+              <copyright>Copyright © 2026 Jake Soenneker</copyright>
+              <tags>azure notification-hubs maui push-notifications notifications fcm apns wns ios android windows dotnet</tags>
+              <repository type="git" url="https://github.com/soenneker/soenneker.azure.notificationhubs.maui" branch="main" commit="${GITHUB_SHA}" />
+              <dependencies>
+                <group targetFramework="net10.0-android36.0">
+                  <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.9" exclude="Build,Analyzers" />
+                  <dependency id="Microsoft.Extensions.Options" version="10.0.9" exclude="Build,Analyzers" />
+                  <dependency id="Microsoft.Maui.Essentials" version="10.0.71" exclude="Build,Analyzers" />
+                  <dependency id="Soenneker.Gen.EnumValues" version="4.0.37" exclude="Build,Analyzers" />
+                  <dependency id="Xamarin.Firebase.Messaging" version="125.0.2" exclude="Build,Analyzers" />
+                </group>
+                <group targetFramework="net10.0-ios26.0">
+                  <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.9" exclude="Build,Analyzers" />
+                  <dependency id="Microsoft.Extensions.Options" version="10.0.9" exclude="Build,Analyzers" />
+                  <dependency id="Microsoft.Maui.Essentials" version="10.0.71" exclude="Build,Analyzers" />
+                  <dependency id="Soenneker.Gen.EnumValues" version="4.0.37" exclude="Build,Analyzers" />
+                </group>
+                <group targetFramework="net10.0-windows10.0.19041">
+                  <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.9" exclude="Build,Analyzers" />
+                  <dependency id="Microsoft.Extensions.Options" version="10.0.9" exclude="Build,Analyzers" />
+                  <dependency id="Microsoft.Maui.Essentials" version="10.0.71" exclude="Build,Analyzers" />
+                  <dependency id="Soenneker.Gen.EnumValues" version="4.0.37" exclude="Build,Analyzers" />
+                </group>
+              </dependencies>
+            </metadata>
+            <files>
+              <file src="README.md" target="README.md" />
+              <file src="LICENSE" target="LICENSE" />
+              <file src="icon.png" target="icon.png" />
+              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.aar" target="lib/net10.0-android36.0" />
+              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.dll" target="lib/net10.0-android36.0" />
+              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.xml" target="lib/net10.0-android36.0" />
+              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.pdb" target="lib/net10.0-android36.0" />
+              <file src="package/lib/net10.0-ios26.0/${PACKAGE_ID}.dll" target="lib/net10.0-ios26.0" />
+              <file src="package/lib/net10.0-ios26.0/${PACKAGE_ID}.xml" target="lib/net10.0-ios26.0" />
+              <file src="package/lib/net10.0-ios26.0/${PACKAGE_ID}.pdb" target="lib/net10.0-ios26.0" />
+              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.dll" target="lib/net10.0-windows10.0.19041" />
+              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.xml" target="lib/net10.0-windows10.0.19041" />
+              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.pdb" target="lib/net10.0-windows10.0.19041" />
+              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.pri" target="lib/net10.0-windows10.0.19041" />
+            </files>
+          </package>
+          EOF
+
+      - name: Pack
+        run: dotnet pack ${{ env.PACKAGE_ID }}.nuspec --output ./artifacts
 
       - name: Publish to NuGet
         shell: bash

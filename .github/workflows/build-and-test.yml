@@ -4,7 +4,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 on:
@@ -16,10 +16,34 @@ on:
 env:
   PipelineEnvironment: true
   NUGET_XMLDOC_MODE: skip
+  DOTNET_VERSION: 10.0.x
+  CONFIGURATION: Release
+  PROJECT: src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj
+  TEST_PROJECT: test/Soenneker.Azure.NotificationHubs.Maui.Tests/Soenneker.Azure.NotificationHubs.Maui.Tests.csproj
 
 jobs:
-  build-and-test:
-    runs-on: windows-latest
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Android
+            os: ubuntu-latest
+            framework: net10.0-android
+            workload: maui-android
+
+          - name: iOS
+            os: macos-latest
+            framework: net10.0-ios
+            workload: maui-ios
+
+          - name: Windows
+            os: windows-latest
+            framework: net10.0-windows10.0.19041.0
+            workload: maui-windows
 
     steps:
       - uses: actions/checkout@v6
@@ -29,19 +53,23 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          workloads: ${{ matrix.workload }}
 
-      - name: Workload restore
-        run: dotnet workload restore src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --verbosity minimal
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT }} -f ${{ matrix.framework }} --verbosity minimal
+
+      - name: Build
+        run: dotnet build ${{ env.PROJECT }} --configuration ${{ env.CONFIGURATION }} -f ${{ matrix.framework }} --no-restore --verbosity minimal
 
       - name: Restore tests
-        run: dotnet restore test/Soenneker.Azure.NotificationHubs.Maui.Tests/Soenneker.Azure.NotificationHubs.Maui.Tests.csproj --verbosity minimal
+        if: matrix.name == 'Windows'
+        run: dotnet restore ${{ env.TEST_PROJECT }} --verbosity minimal
 
       - name: Build tests
-        run: dotnet build test/Soenneker.Azure.NotificationHubs.Maui.Tests/Soenneker.Azure.NotificationHubs.Maui.Tests.csproj --configuration Release --no-restore --verbosity minimal
+        if: matrix.name == 'Windows'
+        run: dotnet build ${{ env.TEST_PROJECT }} --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
 
       - name: Test
-        run: dotnet test --project test/Soenneker.Azure.NotificationHubs.Maui.Tests/Soenneker.Azure.NotificationHubs.Maui.Tests.csproj --configuration Release --no-build --no-restore --verbosity minimal
-
-      - name: Pack
-        run: dotnet pack src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --configuration Release --no-build --no-restore --output . --verbosity minimal
+        if: matrix.name == 'Windows'
+        run: dotnet test --project ${{ env.TEST_PROJECT }} --configuration ${{ env.CONFIGURATION }} --no-build --no-restore --verbosity minimal

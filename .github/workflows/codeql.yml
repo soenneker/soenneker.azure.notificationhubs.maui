@@ -13,6 +13,10 @@ on:
 
 env:
   NUGET_XMLDOC_MODE: skip
+  DOTNET_VERSION: 10.0.x
+  CONFIGURATION: Release
+  PROJECT: src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj
+  FRAMEWORK: net10.0-windows10.0.19041.0
 
 permissions:
   actions: read
@@ -33,7 +37,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          workloads: maui-windows
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -41,14 +46,11 @@ jobs:
           languages: csharp
           build-mode: manual
 
-      - name: Workload restore
-        run: dotnet workload restore ./src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --verbosity minimal
-
       - name: Restore src
-        run: dotnet restore ./src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --verbosity minimal
+        run: dotnet restore ${{ env.PROJECT }} -f ${{ env.FRAMEWORK }} --verbosity minimal
 
       - name: Build src
-        run: dotnet build ./src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj --configuration Release --no-restore --verbosity minimal
+        run: dotnet build ${{ env.PROJECT }} --configuration ${{ env.CONFIGURATION }} -f ${{ env.FRAMEWORK }} --no-restore --verbosity minimal
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
