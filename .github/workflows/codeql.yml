@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   analyze:
-    runs-on: macos-latest
+    runs-on: windows-latest
     name: CodeQL Analysis
 
     steps:

@@ -22,7 +22,7 @@ env:
 
 jobs:
   publish-package:
-    runs-on: macos-latest
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v6
