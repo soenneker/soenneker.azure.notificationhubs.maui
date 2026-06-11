@@ -69,7 +69,7 @@ jobs:
           workloads: ${{ matrix.workload }}
 
       - name: Restore
-        run: dotnet restore ${{ env.PROJECT }} -f ${{ matrix.framework }} --verbosity minimal
+        run: dotnet restore ${{ env.PROJECT }} /p:TargetFramework=${{ matrix.framework }} --verbosity minimal
 
       - name: Build
         run: dotnet build ${{ env.PROJECT }} --configuration ${{ env.CONFIGURATION }} -f ${{ matrix.framework }} --no-restore --verbosity minimal

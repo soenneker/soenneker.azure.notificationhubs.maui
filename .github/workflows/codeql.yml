@@ -47,7 +47,7 @@ jobs:
           build-mode: manual
 
       - name: Restore src
-        run: dotnet restore ${{ env.PROJECT }} -f ${{ env.FRAMEWORK }} --verbosity minimal
+        run: dotnet restore ${{ env.PROJECT }} /p:TargetFramework=${{ env.FRAMEWORK }} --verbosity minimal
 
       - name: Build src
         run: dotnet build ${{ env.PROJECT }} --configuration ${{ env.CONFIGURATION }} -f ${{ env.FRAMEWORK }} --no-restore --verbosity minimal
