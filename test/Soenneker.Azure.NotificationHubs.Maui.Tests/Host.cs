@@ -27,6 +27,9 @@ public sealed class Host : UnitTestHost
         IConfiguration config = TestUtil.BuildConfig();
         services.AddSingleton(config);
 
-        services.AddAzureNotificationHubMauiUtilAsScoped();
+        services.AddAzureNotificationHubsMaui(options =>
+        {
+            options.ThrowIfInstallationRegistrarMissing = false;
+        });
     }
 }

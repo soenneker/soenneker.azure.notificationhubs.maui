@@ -2,8 +2,11 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <Nullable>enable</Nullable>
+        <NoWarn>$(NoWarn);CA1416;CA1418</NoWarn>
+        <Win2DWarnNoPlatform>false</Win2DWarnNoPlatform>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
