@@ -124,6 +124,10 @@ jobs:
           name: windows
           path: package/lib/net10.0-windows10.0.19041
 
+      - name: List package inputs
+        shell: bash
+        run: find package -type f | sort
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
@@ -147,6 +151,38 @@ jobs:
       - name: Create nuspec
         shell: bash
         run: |
+          set -euo pipefail
+
+          for framework in net10.0-android36.0 net10.0-ios26.0 net10.0-windows10.0.19041; do
+            dll="package/lib/${framework}/${PACKAGE_ID}.dll"
+
+            if [ ! -f "$dll" ]; then
+              echo "::error::Missing required package asset: $dll"
+              exit 1
+            fi
+          done
+
+          write_file_entry() {
+            local src="$1"
+            local target="$2"
+
+            if [ -f "$src" ]; then
+              printf '              <file src="%s" target="%s" />\n' "$src" "$target"
+            fi
+          }
+
+          {
+            printf '              <file src="README.md" target="README.md" />\n'
+            printf '              <file src="LICENSE" target="LICENSE" />\n'
+            printf '              <file src="icon.png" target="icon.png" />\n'
+
+            for framework in net10.0-android36.0 net10.0-ios26.0 net10.0-windows10.0.19041; do
+              for extension in aar dll xml pdb pri; do
+                write_file_entry "package/lib/${framework}/${PACKAGE_ID}.${extension}" "lib/${framework}"
+              done
+            done
+          } > package-files.xml
+
           cat > "${PACKAGE_ID}.nuspec" <<EOF
           <?xml version="1.0" encoding="utf-8"?>
           <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
@@ -186,20 +222,7 @@ jobs:
               </dependencies>
             </metadata>
             <files>
-              <file src="README.md" target="README.md" />
-              <file src="LICENSE" target="LICENSE" />
-              <file src="icon.png" target="icon.png" />
-              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.aar" target="lib/net10.0-android36.0" />
-              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.dll" target="lib/net10.0-android36.0" />
-              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.xml" target="lib/net10.0-android36.0" />
-              <file src="package/lib/net10.0-android36.0/${PACKAGE_ID}.pdb" target="lib/net10.0-android36.0" />
-              <file src="package/lib/net10.0-ios26.0/${PACKAGE_ID}.dll" target="lib/net10.0-ios26.0" />
-              <file src="package/lib/net10.0-ios26.0/${PACKAGE_ID}.xml" target="lib/net10.0-ios26.0" />
-              <file src="package/lib/net10.0-ios26.0/${PACKAGE_ID}.pdb" target="lib/net10.0-ios26.0" />
-              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.dll" target="lib/net10.0-windows10.0.19041" />
-              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.xml" target="lib/net10.0-windows10.0.19041" />
-              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.pdb" target="lib/net10.0-windows10.0.19041" />
-              <file src="package/lib/net10.0-windows10.0.19041/${PACKAGE_ID}.pri" target="lib/net10.0-windows10.0.19041" />
+          $(cat package-files.xml)
             </files>
           </package>
           EOF
