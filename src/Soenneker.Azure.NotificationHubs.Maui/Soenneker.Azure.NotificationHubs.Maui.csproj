@@ -66,6 +66,6 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
-        <PackageReference Include="Xamarin.Firebase.Messaging" Version="125.0.2" />
+        <PackageReference Include="Xamarin.Firebase.Messaging" Version="125.1.0" />
     </ItemGroup>
 </Project>
