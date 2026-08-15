@@ -64,7 +64,7 @@ jobs:
 
       - name: Restore tests
         if: matrix.name == 'Windows'
-        run: dotnet restore ${{ env.TEST_PROJECT }} --verbosity minimal
+        run: dotnet restore ${{ env.TEST_PROJECT }} /p:TargetFramework=${{ matrix.framework }} --verbosity minimal
 
       - name: Build tests
         if: matrix.name == 'Windows'
