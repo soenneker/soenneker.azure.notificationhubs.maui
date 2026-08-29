@@ -12,6 +12,7 @@ public interface IAzureNotificationHubMauiService
     /// Initializes local state required for installation lifecycle operations.
     /// </summary>
     /// <param name="cancellationToken">A token to observe while initializing.</param>
+    /// <returns>A task that completes when the azure notification hub maui service is ready for use.</returns>
     ValueTask Initialize(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -25,11 +26,13 @@ public interface IAzureNotificationHubMauiService
     /// Sends the current installation to the optional app-provided registrar.
     /// </summary>
     /// <param name="cancellationToken">A token to observe while registering.</param>
+    /// <returns>A task that completes when the current installation registration is complete.</returns>
     ValueTask RegisterCurrentInstallation(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Unregisters the current installation through the optional app-provided registrar.
     /// </summary>
     /// <param name="cancellationToken">A token to observe while unregistering.</param>
+    /// <returns>A task that completes when the current installation registration has been removed.</returns>
     ValueTask UnregisterCurrentInstallation(CancellationToken cancellationToken = default);
 }
