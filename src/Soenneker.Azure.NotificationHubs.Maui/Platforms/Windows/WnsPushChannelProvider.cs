@@ -8,6 +8,7 @@ using Windows.Networking.PushNotifications;
 
 namespace Soenneker.Azure.NotificationHubs.Maui.Platforms.Windows;
 
+/// <inheritdoc cref="IAzureNotificationHubMauiPushChannelProvider" />
 internal sealed class WnsPushChannelProvider : IAzureNotificationHubMauiPushChannelProvider
 {
     private readonly IAzureNotificationHubMauiPushChannelStore _store;

@@ -5,6 +5,7 @@ using Soenneker.Azure.NotificationHubs.Maui.Abstract;
 
 namespace Soenneker.Azure.NotificationHubs.Maui;
 
+/// <inheritdoc cref="IAzureNotificationHubMauiPermissionService" />
 internal sealed class PermissionService : IAzureNotificationHubMauiPermissionService
 {
     public async ValueTask<PermissionStatus> CheckPermission(CancellationToken cancellationToken = default)

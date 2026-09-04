@@ -6,6 +6,7 @@ using Soenneker.Azure.NotificationHubs.Maui.Abstract;
 
 namespace Soenneker.Azure.NotificationHubs.Maui.Platforms.Ios;
 
+/// <inheritdoc cref="IAzureNotificationHubMauiPushChannelProvider" />
 internal sealed class ApnsPushChannelProvider : IAzureNotificationHubMauiPushChannelProvider
 {
     private readonly IAzureNotificationHubMauiPushChannelStore _store;

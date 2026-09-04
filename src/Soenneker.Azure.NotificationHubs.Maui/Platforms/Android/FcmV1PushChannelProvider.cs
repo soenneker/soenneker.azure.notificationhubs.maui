@@ -9,6 +9,7 @@ using AndroidTask = Android.Gms.Tasks.Task;
 
 namespace Soenneker.Azure.NotificationHubs.Maui.Platforms.Android;
 
+/// <inheritdoc cref="IAzureNotificationHubMauiPushChannelProvider" />
 internal sealed class FcmV1PushChannelProvider : IAzureNotificationHubMauiPushChannelProvider
 {
     private readonly IAzureNotificationHubMauiPushChannelStore _store;

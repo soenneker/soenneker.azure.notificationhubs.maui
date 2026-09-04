@@ -8,6 +8,7 @@ using Soenneker.Azure.NotificationHubs.Maui.Internal;
 namespace Soenneker.Azure.NotificationHubs.Maui;
 
 internal sealed class InstallationIdProvider : IAzureNotificationHubMauiInstallationIdProvider
+/// <inheritdoc cref="IAzureNotificationHubMauiInstallationIdProvider" />
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 

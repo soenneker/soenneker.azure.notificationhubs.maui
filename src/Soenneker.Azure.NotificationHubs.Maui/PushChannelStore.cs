@@ -5,6 +5,7 @@ using Soenneker.Azure.NotificationHubs.Maui.Internal;
 
 namespace Soenneker.Azure.NotificationHubs.Maui;
 
+/// <inheritdoc cref="IAzureNotificationHubMauiPushChannelStore" />
 internal sealed class PushChannelStore : IAzureNotificationHubMauiPushChannelStore
 {
     public ValueTask<AzureNotificationHubMauiPushChannel?> Get(CancellationToken cancellationToken = default)

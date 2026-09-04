@@ -4,6 +4,7 @@ using Soenneker.Azure.NotificationHubs.Maui.Abstract;
 
 namespace Soenneker.Azure.NotificationHubs.Maui;
 
+/// <inheritdoc cref="IAzureNotificationHubMauiTapRouter" />
 internal sealed class TapRouter : IAzureNotificationHubMauiTapRouter
 {
     public event EventHandler<AzureNotificationHubMauiNotificationTappedEventArgs>? NotificationTapped;

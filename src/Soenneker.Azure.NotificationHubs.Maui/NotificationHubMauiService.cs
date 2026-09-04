@@ -8,6 +8,7 @@ using Soenneker.Azure.NotificationHubs.Maui.Abstract;
 
 namespace Soenneker.Azure.NotificationHubs.Maui;
 
+/// <inheritdoc cref="IAzureNotificationHubMauiService" />
 internal sealed class NotificationHubMauiService : IAzureNotificationHubMauiService
 {
     private readonly IAzureNotificationHubMauiInstallationProvider _installationProvider;
