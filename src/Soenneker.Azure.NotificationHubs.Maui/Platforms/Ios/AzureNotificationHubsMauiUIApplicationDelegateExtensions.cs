@@ -20,7 +20,7 @@ public static class AzureNotificationHubsMauiUIApplicationDelegateExtensions
         if (bytes.Length == 0)
             throw new ArgumentException("The APNs device token data was empty.", nameof(deviceToken));
 
-        string pushChannel = Convert.ToHexString(bytes).ToLowerInvariant();
+        string pushChannel = Convert.ToHexStringLower(bytes);
         return appDelegate.SetAzureNotificationHubsMauiApnsPushChannel(pushChannel, cancellationToken);
     }
 
