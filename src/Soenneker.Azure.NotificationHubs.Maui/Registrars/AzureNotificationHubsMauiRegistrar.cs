@@ -2,30 +2,12 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Soenneker.Azure.NotificationHubs.Maui.Abstract;
-    /// <summary>
-    /// Registers Azure Notification Hubs Maui with the service collection.
-    /// </summary>
-    /// <param name="services">Service collection that receives the registration.</param>
-    /// <param name="configure">Callback that configures Notification Hubs for the MAUI application.</param>
-    /// <returns>The same service collection, so additional registrations can be chained.</returns>
 #if ANDROID
 using Soenneker.Azure.NotificationHubs.Maui.Platforms.Android;
 #endif
-    /// <summary>
-    /// Registers Azure Notification Hubs Maui with the service collection.
-    /// </summary>
-    /// <param name="services">Service collection that receives the registration.</param>
-    /// <param name="configure">Callback that configures Notification Hubs for the MAUI application.</param>
-    /// <returns>The same service collection, so additional registrations can be chained.</returns>
 #if IOS
 using Soenneker.Azure.NotificationHubs.Maui.Platforms.Ios;
 #endif
-    /// <summary>
-    /// Registers Azure Notification Hubs Maui with the service collection.
-    /// </summary>
-    /// <param name="services">Service collection that receives the registration.</param>
-    /// <param name="configure">Callback that configures Notification Hubs for the MAUI application.</param>
-    /// <returns>The same service collection, so additional registrations can be chained.</returns>
 #if WINDOWS
 using Soenneker.Azure.NotificationHubs.Maui.Platforms.Windows;
 #endif
