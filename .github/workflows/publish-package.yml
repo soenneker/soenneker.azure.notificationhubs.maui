@@ -236,7 +236,7 @@ jobs:
         run: dotnet pack ${{ env.PACKAGE_ID }}.nuspec --output ./artifacts
 
       - name: Log in to NuGet
-        uses: NuGet/login@v1
+        uses: soenneker/nuget-resilient-login@v2
         id: nuget-login
         with:
           user: soenneker
