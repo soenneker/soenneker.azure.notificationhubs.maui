@@ -35,25 +35,25 @@ jobs:
         include:
           - name: Android
             os: ubuntu-latest
-            framework: net10.0-android
-            output_framework: net10.0-android
-            package_framework: net10.0-android36.0
+            framework: net11.0-android
+            output_framework: net11.0-android
+            package_framework: net11.0-android36.0
             workload: maui-android
             artifact: android
 
           - name: iOS
             os: macos-latest
-            framework: net10.0-ios
-            output_framework: net10.0-ios
-            package_framework: net10.0-ios26.0
+            framework: net11.0-ios
+            output_framework: net11.0-ios
+            package_framework: net11.0-ios26.0
             workload: maui-ios
             artifact: ios
 
           - name: Windows
             os: windows-latest
-            framework: net10.0-windows10.0.19041.0
-            output_framework: net10.0-windows10.0.19041.0
-            package_framework: net10.0-windows10.0.19041
+            framework: net11.0-windows10.0.19041.0
+            output_framework: net11.0-windows10.0.19041.0
+            package_framework: net11.0-windows10.0.19041
             workload: maui-windows
             artifact: windows
 
@@ -65,7 +65,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.402
+          dotnet-version: 11.0.100-rc.3.26522.148
           workloads: ${{ matrix.workload }}
 
       - name: Restore
@@ -110,19 +110,19 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: android
-          path: package/lib/net10.0-android36.0
+          path: package/lib/net11.0-android36.0
 
       - name: Download iOS
         uses: actions/download-artifact@v8
         with:
           name: ios
-          path: package/lib/net10.0-ios26.0
+          path: package/lib/net11.0-ios26.0
 
       - name: Download Windows
         uses: actions/download-artifact@v8
         with:
           name: windows
-          path: package/lib/net10.0-windows10.0.19041
+          path: package/lib/net11.0-windows10.0.19041
 
       - name: List package inputs
         shell: bash
@@ -131,12 +131,12 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.402
+          dotnet-version: 11.0.100-rc.3.26522.148
 
       - name: Setting up build version
         shell: bash
         run: |
-          echo "BUILD_VERSION=4.0.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          echo "BUILD_VERSION=11.0.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
 
       - name: Get release notes from latest commit
         uses: soenneker/release-notes-from-commits@v2
@@ -146,7 +146,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          for framework in net10.0-android36.0 net10.0-ios26.0 net10.0-windows10.0.19041; do
+          for framework in net11.0-android36.0 net11.0-ios26.0 net11.0-windows10.0.19041; do
             dll="package/lib/${framework}/${PACKAGE_ID}.dll"
 
             if [ ! -f "$dll" ]; then
@@ -169,7 +169,7 @@ jobs:
             printf '              <file src="LICENSE" target="LICENSE" />\n'
             printf '              <file src="icon.png" target="icon.png" />\n'
 
-            for framework in net10.0-android36.0 net10.0-ios26.0 net10.0-windows10.0.19041; do
+            for framework in net11.0-android36.0 net11.0-ios26.0 net11.0-windows10.0.19041; do
               for extension in aar dll xml pdb pri; do
                 write_file_entry "package/lib/${framework}/${PACKAGE_ID}.${extension}" "lib/${framework}"
               done
@@ -193,20 +193,20 @@ jobs:
               <tags>azure notification-hubs maui push-notifications notifications fcm apns wns ios android windows dotnet</tags>
               <repository type="git" url="https://github.com/soenneker/soenneker.azure.notificationhubs.maui" branch="main" commit="${GITHUB_SHA}" />
               <dependencies>
-                <group targetFramework="net10.0-android36.0">
+                <group targetFramework="net11.0-android36.0">
                   <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.9" exclude="Build,Analyzers" />
                   <dependency id="Microsoft.Extensions.Options" version="10.0.9" exclude="Build,Analyzers" />
                   <dependency id="Microsoft.Maui.Essentials" version="10.0.71" exclude="Build,Analyzers" />
                   <dependency id="Soenneker.Gen.EnumValues" version="4.0.37" exclude="Build,Analyzers" />
                   <dependency id="Xamarin.Firebase.Messaging" version="125.0.2" exclude="Build,Analyzers" />
                 </group>
-                <group targetFramework="net10.0-ios26.0">
+                <group targetFramework="net11.0-ios26.0">
                   <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.9" exclude="Build,Analyzers" />
                   <dependency id="Microsoft.Extensions.Options" version="10.0.9" exclude="Build,Analyzers" />
                   <dependency id="Microsoft.Maui.Essentials" version="10.0.71" exclude="Build,Analyzers" />
                   <dependency id="Soenneker.Gen.EnumValues" version="4.0.37" exclude="Build,Analyzers" />
                 </group>
-                <group targetFramework="net10.0-windows10.0.19041">
+                <group targetFramework="net11.0-windows10.0.19041">
                   <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.9" exclude="Build,Analyzers" />
                   <dependency id="Microsoft.Extensions.Options" version="10.0.9" exclude="Build,Analyzers" />
                   <dependency id="Microsoft.Maui.Essentials" version="10.0.71" exclude="Build,Analyzers" />
