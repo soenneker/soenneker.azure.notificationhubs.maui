@@ -19,7 +19,7 @@ permissions:
 env:
   PipelineEnvironment: true
   NUGET_XMLDOC_MODE: skip
-  DOTNET_VERSION: 10.0.401
+  DOTNET_VERSION: 11.0.100-rc.3.26522.148
   CONFIGURATION: Release
   PROJECT: src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj
   PACKAGE_ID: Soenneker.Azure.NotificationHubs.Maui
