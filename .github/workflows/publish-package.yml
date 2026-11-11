@@ -19,7 +19,7 @@ permissions:
 env:
   PipelineEnvironment: true
   NUGET_XMLDOC_MODE: skip
-  DOTNET_VERSION: 11.0.100-rc.3.26522.148
+  DOTNET_VERSION: 11.0.100
   CONFIGURATION: Release
   PROJECT: src/Soenneker.Azure.NotificationHubs.Maui/Soenneker.Azure.NotificationHubs.Maui.csproj
   PACKAGE_ID: Soenneker.Azure.NotificationHubs.Maui
@@ -65,7 +65,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 11.0.100-rc.3.26522.148
+          dotnet-version: 11.0.100
           workloads: ${{ matrix.workload }}
 
       - name: Restore
@@ -131,7 +131,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 11.0.100-rc.3.26522.148
+          dotnet-version: 11.0.100
 
       - name: Setting up build version
         shell: bash
