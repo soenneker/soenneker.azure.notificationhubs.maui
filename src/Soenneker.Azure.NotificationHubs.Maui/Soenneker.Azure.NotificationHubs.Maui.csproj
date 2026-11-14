@@ -55,7 +55,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Essentials" Version="11.0.10" />
         <PackageReference Include="Soenneker.Asyncs.Initializers" Version="11.0.140" />
-        <PackageReference Include="Soenneker.Gen.EnumValues" Version="11.0.66" />
+        <PackageReference Include="Soenneker.Gen.EnumValues" Version="11.0.67" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net11.0-android'">
